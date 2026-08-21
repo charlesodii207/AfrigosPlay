@@ -10,6 +10,7 @@ type UserRow = {
   role: string;
   is_premium: boolean;
   is_active: boolean;
+  must_change_password: boolean;
   created_at: string;
 };
 
@@ -177,11 +178,16 @@ export default function AdminStaffPage() {
                       </span>
                     </td>
                     <td className="py-3 pr-4">
-                      {u.is_active ? (
-                        <span className="text-green-400 text-xs">Active</span>
-                      ) : (
-                        <span className="text-red-400 text-xs">Inactive</span>
-                      )}
+                      <div className="flex flex-col gap-1">
+                        {u.is_active ? (
+                          <span className="text-green-400 text-xs">Active</span>
+                        ) : (
+                          <span className="text-red-400 text-xs">Inactive</span>
+                        )}
+                        {u.must_change_password && (
+                          <span className="text-yellow-400 text-[11px]">Password not reset</span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 pr-4 text-gray-400 text-xs">
                       {new Date(u.created_at).toLocaleDateString()}
