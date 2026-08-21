@@ -110,11 +110,51 @@ export default function AdminFilmsPage() {
     ARCHIVED: "bg-red-500/20 text-red-400",
   };
 
+  function FilmActions({ film }: { film: Film }) {
+    return (
+      <div className="flex gap-4 sm:gap-3 flex-wrap">
+        <Link
+          href={`/admin/films/${film.id}/edit`}
+          className="text-white hover:text-accent text-xs py-1"
+        >
+          Edit
+        </Link>
+        <button
+          onClick={() => handleToggleStatus(film)}
+          className="text-accent hover:opacity-80 text-xs py-1"
+        >
+          {film.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+        </button>
+        {film.is_featured ? (
+          <button
+            onClick={() => handleUnfeature(film)}
+            className="text-gray-400 hover:text-white text-xs py-1"
+          >
+            Unfeature
+          </button>
+        ) : (
+          <button
+            onClick={() => handleSetFeatured(film)}
+            className="text-gray-400 hover:text-white text-xs py-1"
+          >
+            Set Featured
+          </button>
+        )}
+        <button
+          onClick={() => handleDelete(film)}
+          className="text-red-400 hover:text-red-300 text-xs py-1"
+        >
+          Delete
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 sm:p-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5 sm:mb-6">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Films</h1>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">Films</h1>
           <p className="text-sm text-gray-400">Manage the catalogue.</p>
         </div>
         <Link
@@ -130,84 +170,88 @@ export default function AdminFilmsPage() {
       {loading ? (
         <p className="text-gray-400">Loading...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b border-white/10">
-                <th className="py-2 pr-4">Title</th>
-                <th className="py-2 pr-4">Genre</th>
-                <th className="py-2 pr-4">Year</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4">Featured</th>
-                <th className="py-2 pr-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {films.map((film) => (
-                <tr key={film.id} className="border-b border-white/5">
-                  <td className="py-3 pr-4">{film.title}</td>
-                  <td className="py-3 pr-4 text-gray-300">{film.genre}</td>
-                  <td className="py-3 pr-4 text-gray-300">{film.release_year}</td>
-                  <td className="py-3 pr-4">
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded font-semibold ${
-                        statusColors[film.status] || "bg-white/10"
-                      }`}
-                    >
-                      {film.status}
+        <>
+          {/* Mobile: stacked cards */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {films.map((film) => (
+              <div key={film.id} className="bg-surface rounded-lg p-4 border border-white/5">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{film.title}</p>
+                    <p className="text-gray-400 text-xs">
+                      {film.genre} · {film.release_year}
+                    </p>
+                  </div>
+                  {film.is_featured && (
+                    <span className="text-xs px-2 py-0.5 rounded font-semibold bg-accent/20 text-accent whitespace-nowrap">
+                      ★ Featured
                     </span>
-                  </td>
-                  <td className="py-3 pr-4">
-                    {film.is_featured ? (
-                      <span className="text-xs px-2 py-0.5 rounded font-semibold bg-accent/20 text-accent">
-                        ★ Featured
-                      </span>
-                    ) : (
-                      <span className="text-gray-600 text-xs">—</span>
-                    )}
-                  </td>
-                  <td className="py-3 pr-4">
-                    <div className="flex gap-3">
-                      <Link
-                        href={`/admin/films/${film.id}/edit`}
-                        className="text-white hover:text-accent text-xs"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => handleToggleStatus(film)}
-                        className="text-accent hover:opacity-80 text-xs"
-                      >
-                        {film.status === "PUBLISHED" ? "Unpublish" : "Publish"}
-                      </button>
-                      {film.is_featured ? (
-                        <button
-                          onClick={() => handleUnfeature(film)}
-                          className="text-gray-400 hover:text-white text-xs"
-                        >
-                          Unfeature
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleSetFeatured(film)}
-                          className="text-gray-400 hover:text-white text-xs"
-                        >
-                          Set Featured
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleDelete(film)}
-                        className="text-red-400 hover:text-red-300 text-xs"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                      statusColors[film.status] || "bg-white/10"
+                    }`}
+                  >
+                    {film.status}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-white/5">
+                  <FilmActions film={film} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-400 border-b border-white/10">
+                  <th className="py-2 pr-4">Title</th>
+                  <th className="py-2 pr-4">Genre</th>
+                  <th className="py-2 pr-4">Year</th>
+                  <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Featured</th>
+                  <th className="py-2 pr-4">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {films.map((film) => (
+                  <tr key={film.id} className="border-b border-white/5">
+                    <td className="py-3 pr-4">{film.title}</td>
+                    <td className="py-3 pr-4 text-gray-300">{film.genre}</td>
+                    <td className="py-3 pr-4 text-gray-300">{film.release_year}</td>
+                    <td className="py-3 pr-4">
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                          statusColors[film.status] || "bg-white/10"
+                        }`}
+                      >
+                        {film.status}
+                      </span>
+                    </td>
+                    <td className="py-3 pr-4">
+                      {film.is_featured ? (
+                        <span className="text-xs px-2 py-0.5 rounded font-semibold bg-accent/20 text-accent">
+                          ★ Featured
+                        </span>
+                      ) : (
+                        <span className="text-gray-600 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-4">
+                      <FilmActions film={film} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

@@ -139,88 +139,137 @@ export default function AdminUsersPage() {
     return new Set(list.map((s) => s.ip_address)).size;
   }
 
+  function UserActions({ u, moderatable }: { u: UserRow; moderatable: boolean }) {
+    return (
+      <div className="flex gap-4 sm:gap-3 flex-wrap">
+        <button
+          onClick={() => openSessions(u)}
+          className="text-accent hover:opacity-80 transition text-xs py-1"
+        >
+          View Sessions
+        </button>
+        {moderatable && (
+          <>
+            <button
+              onClick={() => handleToggleBlock(u)}
+              className="text-yellow-400 hover:opacity-80 transition text-xs py-1"
+            >
+              {u.is_active ? "Block" : "Unblock"}
+            </button>
+            <button
+              onClick={() => handleDelete(u)}
+              className="text-red-400 hover:opacity-80 transition text-xs py-1"
+            >
+              Delete
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 sm:p-8">
-      <h1 className="text-2xl font-bold mb-1">Users</h1>
-      <p className="text-sm text-gray-400 mb-6">All registered accounts.</p>
+    <div className="p-4 sm:p-6 md:p-8">
+      <h1 className="text-xl sm:text-2xl font-bold mb-1">Users</h1>
+      <p className="text-sm text-gray-400 mb-5 sm:mb-6">All registered accounts.</p>
 
       {actionError && <p className="text-red-400 text-sm mb-4">{actionError}</p>}
 
       {loading ? (
         <p className="text-gray-400">Loading...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b border-white/10">
-                <th className="py-2 pr-4">Name</th>
-                <th className="py-2 pr-4">Email</th>
-                <th className="py-2 pr-4">Role</th>
-                <th className="py-2 pr-4">Premium</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4">Joined</th>
-                <th className="py-2 pr-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => {
-                const moderatable = canModerate(myRole, u.role);
-                return (
-                  <tr key={u.id} className="border-b border-white/5">
-                    <td className="py-3 pr-4">{u.full_name || "—"}</td>
-                    <td className="py-3 pr-4 text-gray-300">{u.email}</td>
-                    <td className="py-3 pr-4">
-                      <span className="text-xs px-2 py-0.5 rounded bg-white/10">{u.role}</span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      {u.is_premium ? (
-                        <span className="text-green-400 text-xs">Premium</span>
-                      ) : (
-                        <span className="text-gray-500 text-xs">—</span>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {u.is_active ? (
-                        <span className="text-green-400 text-xs">Active</span>
-                      ) : (
-                        <span className="text-red-400 text-xs">Blocked</span>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4 text-gray-400 text-xs">
-                      {new Date(u.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 pr-4">
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => openSessions(u)}
-                          className="text-accent hover:opacity-80 transition text-xs"
-                        >
-                          View Sessions
-                        </button>
-                        {moderatable && (
-                          <>
-                            <button
-                              onClick={() => handleToggleBlock(u)}
-                              className="text-yellow-400 hover:opacity-80 transition text-xs"
-                            >
-                              {u.is_active ? "Block" : "Unblock"}
-                            </button>
-                            <button
-                              onClick={() => handleDelete(u)}
-                              className="text-red-400 hover:opacity-80 transition text-xs"
-                            >
-                              Delete
-                            </button>
-                          </>
+        <>
+          {/* Mobile: stacked cards */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {users.map((u) => {
+              const moderatable = canModerate(myRole, u.role);
+              return (
+                <div key={u.id} className="bg-surface rounded-lg p-4 border border-white/5">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{u.full_name || "—"}</p>
+                      <p className="text-gray-400 text-xs truncate">{u.email}</p>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 rounded bg-white/10 whitespace-nowrap">
+                      {u.role}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-xs">
+                    {u.is_premium ? (
+                      <span className="text-green-400">Premium</span>
+                    ) : (
+                      <span className="text-gray-500">Free tier</span>
+                    )}
+                    {u.is_active ? (
+                      <span className="text-green-400">Active</span>
+                    ) : (
+                      <span className="text-red-400">Blocked</span>
+                    )}
+                    <span className="text-gray-500">
+                      Joined {new Date(u.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5">
+                    <UserActions u={u} moderatable={moderatable} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-400 border-b border-white/10">
+                  <th className="py-2 pr-4">Name</th>
+                  <th className="py-2 pr-4">Email</th>
+                  <th className="py-2 pr-4">Role</th>
+                  <th className="py-2 pr-4">Premium</th>
+                  <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Joined</th>
+                  <th className="py-2 pr-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => {
+                  const moderatable = canModerate(myRole, u.role);
+                  return (
+                    <tr key={u.id} className="border-b border-white/5">
+                      <td className="py-3 pr-4">{u.full_name || "—"}</td>
+                      <td className="py-3 pr-4 text-gray-300">{u.email}</td>
+                      <td className="py-3 pr-4">
+                        <span className="text-xs px-2 py-0.5 rounded bg-white/10">{u.role}</span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {u.is_premium ? (
+                          <span className="text-green-400 text-xs">Premium</span>
+                        ) : (
+                          <span className="text-gray-500 text-xs">—</span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {u.is_active ? (
+                          <span className="text-green-400 text-xs">Active</span>
+                        ) : (
+                          <span className="text-red-400 text-xs">Blocked</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4 text-gray-400 text-xs">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <UserActions u={u} moderatable={moderatable} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {sessionsUser && (
@@ -229,12 +278,18 @@ export default function AdminUsersPage() {
           onClick={closeSessions}
         >
           <div
-            className="bg-surface rounded max-w-lg w-full p-6"
+            className="bg-surface rounded max-w-lg w-full p-5 sm:p-6 max-h-[90dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold">Login history — {sessionsUser.email}</h2>
-              <button onClick={closeSessions} className="text-gray-400 hover:text-white">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <h2 className="text-lg font-bold break-words">
+                Login history — {sessionsUser.email}
+              </h2>
+              <button
+                onClick={closeSessions}
+                className="text-gray-400 hover:text-white shrink-0 p-1 -m-1"
+                aria-label="Close"
+              >
                 ✕
               </button>
             </div>
@@ -253,8 +308,10 @@ export default function AdminUsersPage() {
                 <div className="max-h-80 overflow-y-auto flex flex-col gap-2">
                   {sessions.map((s) => (
                     <div key={s.id} className="bg-background rounded p-3 text-sm">
-                      <p className="font-medium">{s.ip_address}</p>
-                      <p className="text-gray-400 text-xs mt-1">{s.user_agent || "Unknown device"}</p>
+                      <p className="font-medium break-all">{s.ip_address}</p>
+                      <p className="text-gray-400 text-xs mt-1 break-words">
+                        {s.user_agent || "Unknown device"}
+                      </p>
                       <p className="text-gray-500 text-xs mt-1">
                         {new Date(s.created_at).toLocaleString()}
                       </p>

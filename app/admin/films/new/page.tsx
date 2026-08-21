@@ -372,8 +372,8 @@ export default function NewFilmPage() {
   const backdropRetry = backdropState.status === "error" || backdropState.status === "stalled";
 
   return (
-    <div className="p-6 sm:p-8 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Add New Film</h1>
+    <div className="p-4 sm:p-6 md:p-8 max-w-2xl">
+      <h1 className="text-xl sm:text-2xl font-bold mb-5 sm:mb-6">Add New Film</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
@@ -388,7 +388,7 @@ export default function NewFilmPage() {
 
         <div>
           <label className={labelClass}>Poster Image * (500×750px, portrait)</label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.webp"
@@ -396,13 +396,13 @@ export default function NewFilmPage() {
                 setPosterFile(e.target.files?.[0] || null);
                 setPosterState(IDLE);
               }}
-              className="text-sm text-gray-300"
+              className="text-xs sm:text-sm text-gray-300 min-w-0 max-w-full"
             />
             <button
               type="button"
               onClick={() => handleUploadImage(posterFile, "poster", setPosterState)}
               disabled={!posterFile || posterBusy}
-              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap shrink-0"
             >
               {posterBusy ? "Uploading..." : posterRetry ? "Retry" : "Upload"}
             </button>
@@ -415,7 +415,7 @@ export default function NewFilmPage() {
 
         <div>
           <label className={labelClass}>Backdrop Image (1920×1080px, landscape — for the homepage hero)</label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <input
               type="file"
               accept=".jpg,.jpeg,.png,.webp"
@@ -423,13 +423,13 @@ export default function NewFilmPage() {
                 setBackdropFile(e.target.files?.[0] || null);
                 setBackdropState(IDLE);
               }}
-              className="text-sm text-gray-300"
+              className="text-xs sm:text-sm text-gray-300 min-w-0 max-w-full"
             />
             <button
               type="button"
               onClick={() => handleUploadImage(backdropFile, "backdrop", setBackdropState)}
               disabled={!backdropFile || backdropBusy}
-              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap shrink-0"
             >
               {backdropBusy ? "Uploading..." : backdropRetry ? "Retry" : "Upload"}
             </button>
@@ -442,7 +442,7 @@ export default function NewFilmPage() {
 
         <div>
           <label className={labelClass}>Video File *</label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <input
               type="file"
               accept=".mp4,.mov,.mkv,.webm"
@@ -450,13 +450,13 @@ export default function NewFilmPage() {
                 setVideoFile(e.target.files?.[0] || null);
                 setVideoState(IDLE);
               }}
-              className="text-sm text-gray-300"
+              className="text-xs sm:text-sm text-gray-300 min-w-0 max-w-full"
             />
             <button
               type="button"
               onClick={handleUploadVideo}
               disabled={!videoFile || videoBusy}
-              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap shrink-0"
             >
               {videoBusy ? "Uploading..." : videoRetry ? "Retry" : "Upload"}
             </button>
@@ -469,7 +469,7 @@ export default function NewFilmPage() {
 
         <div>
           <label className={labelClass}>Trailer Video *</label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <input
               type="file"
               accept=".mp4,.mov,.mkv,.webm"
@@ -477,13 +477,13 @@ export default function NewFilmPage() {
                 setTrailerFile(e.target.files?.[0] || null);
                 setTrailerState(IDLE);
               }}
-              className="text-sm text-gray-300"
+              className="text-xs sm:text-sm text-gray-300 min-w-0 max-w-full"
             />
             <button
               type="button"
               onClick={handleUploadTrailer}
               disabled={!trailerFile || trailerBusy}
-              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap"
+              className="bg-white/20 px-3 py-1.5 rounded text-xs font-semibold disabled:opacity-50 whitespace-nowrap shrink-0"
             >
               {trailerBusy ? "Uploading..." : trailerRetry ? "Retry" : "Upload"}
             </button>
@@ -494,7 +494,7 @@ export default function NewFilmPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Genre *</label>
             <input name="genre" value={form.genre} onChange={handleChange} required className={inputClass} />
@@ -510,7 +510,7 @@ export default function NewFilmPage() {
           <input name="cast" value={form.cast} onChange={handleChange} required placeholder="Comma-separated names" className={inputClass} />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Release Year *</label>
             <input name="release_year" type="number" value={form.release_year} onChange={handleChange} required className={inputClass} />
@@ -521,7 +521,7 @@ export default function NewFilmPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Language</label>
             <input name="language" value={form.language} onChange={handleChange} className={inputClass} />
@@ -532,7 +532,7 @@ export default function NewFilmPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Age Rating</label>
             <input name="age_rating" value={form.age_rating} onChange={handleChange} className={inputClass} />
@@ -549,7 +549,7 @@ export default function NewFilmPage() {
         </div>
 
         {/* --- Industry / collection tagging --- */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Industry</label>
             <select name="industry" value={form.industry} onChange={handleChange} className={inputClass}>
@@ -564,13 +564,13 @@ export default function NewFilmPage() {
           </div>
 
           <div className="flex flex-col justify-end">
-            <label className="flex items-center gap-2 bg-surface px-4 py-2 rounded text-sm cursor-pointer h-[38px]">
+            <label className="flex items-center gap-2 bg-surface px-4 py-2 rounded text-sm cursor-pointer min-h-[38px]">
               <input
                 type="checkbox"
                 name="is_afrihub_original"
                 checked={form.is_afrihub_original}
                 onChange={handleChange}
-                className="w-4 h-4 accent-accent"
+                className="w-4 h-4 accent-accent shrink-0"
               />
               AFRIGOS PLAY Original
             </label>
@@ -609,7 +609,7 @@ export default function NewFilmPage() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-accent px-6 py-3 rounded font-semibold disabled:opacity-50 mt-2"
+          className="bg-accent px-6 py-3 rounded font-semibold disabled:opacity-50 mt-2 w-full sm:w-auto"
         >
           {loading ? "Creating..." : "Create Film"}
         </button>

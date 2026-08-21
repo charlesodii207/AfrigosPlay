@@ -83,38 +83,40 @@ export default function AdminGatePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-white flex items-center justify-center px-4">
-      <div className="max-w-sm w-full">
-        <h1 className="text-2xl font-bold mb-1">Admin Access</h1>
-        <p className="text-sm text-gray-400 mb-6">
+    <main className="min-h-[100dvh] bg-background text-white flex items-center justify-center px-4 py-8 sm:px-6">
+      <div className="w-full max-w-[22rem] sm:max-w-sm">
+        <h1 className="text-xl sm:text-2xl font-bold mb-1">Admin Access</h1>
+        <p className="text-xs sm:text-sm text-gray-400 mb-5 sm:mb-6 leading-relaxed">
           Authorized personnel only. If you don't have admin credentials,
           this isn't the page you're looking for.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4">
           <input
             type="text"
             placeholder="Username"
             required
+            autoComplete="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="bg-surface px-4 py-3 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+            className="bg-surface px-4 py-3 rounded text-sm outline-none focus:ring-2 focus:ring-accent w-full"
           />
           <input
             type="password"
             placeholder="Password"
             required
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-surface px-4 py-3 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+            className="bg-surface px-4 py-3 rounded text-sm outline-none focus:ring-2 focus:ring-accent w-full"
           />
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p className="text-red-400 text-xs sm:text-sm">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="bg-accent px-4 py-3 rounded font-semibold text-sm disabled:opacity-50"
+            className="bg-accent px-4 py-3 rounded font-semibold text-sm disabled:opacity-50 w-full active:scale-[0.99] transition-transform"
           >
             {loading ? "Checking..." : "Log In"}
           </button>
