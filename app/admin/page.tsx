@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminGatePage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,11 +45,11 @@ export default function AdminGatePage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier: username, password }),
       });
 
       if (!res.ok) {
-        setError("Incorrect email or password");
+        setError("Incorrect username or password");
         setLoading(false);
         return;
       }
@@ -65,7 +65,7 @@ export default function AdminGatePage() {
       if (!adminRoles.includes(me.role)) {
         // Same generic message as a bad password — never confirm the
         // account exists or that credentials were correct.
-        setError("Incorrect email or password");
+        setError("Incorrect username or password");
         setLoading(false);
         return;
       }
@@ -93,11 +93,11 @@ export default function AdminGatePage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
-            type="email"
-            placeholder="Email"
+            type="text"
+            placeholder="Username"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="bg-surface px-4 py-3 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
           />
           <input

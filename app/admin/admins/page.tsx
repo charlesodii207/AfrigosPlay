@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 
 type UserRow = {
   id: number;
-  email: string;
+  email: string | null;
+  username: string | null;
   full_name: string | null;
   role: string;
   is_premium: boolean;
@@ -40,12 +41,12 @@ export default function AdminStaffPage() {
   const [loading, setLoading] = useState(true);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
+  const [newUsername, setNewUsername] = useState("");
   const [newFullName, setNewFullName] = useState("");
   const [newRole, setNewRole] = useState("admin");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
-  const [revealedPassword, setRevealedPassword] = useState<{ email: string; password: string } | null>(null);
+  const [revealedPassword, setRevealedPassword] = useState<{ username: string; password: string } | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -89,7 +90,7 @@ export default function AdminStaffPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email: newEmail, full_name: newFullName || null, role: newRole }),
+        body: JSON.stringify({ username: newUsername, full_name: newFullName || null, role: newRole }),
       });
 
       const data = await res.json();
@@ -100,9 +101,9 @@ export default function AdminStaffPage() {
         return;
       }
 
-      setRevealedPassword({ email: data.email, password: data.temp_password });
+      setRevealedPassword({ username: data.username, password: data.temp_password });
       setShowCreateModal(false);
-      setNewEmail("");
+      setNewUsername("");
       setNewFullName("");
       setNewRole("admin");
       setCreating(false);
@@ -155,7 +156,7 @@ export default function AdminStaffPage() {
             <thead>
               <tr className="text-left text-gray-400 border-b border-white/10">
                 <th className="py-2 pr-4">Name</th>
-                <th className="py-2 pr-4">Email</th>
+                <th className="py-2 pr-4">Username</th>
                 <th className="py-2 pr-4">Tier</th>
                 <th className="py-2 pr-4">Status</th>
                 <th className="py-2 pr-4">Created</th>
@@ -169,7 +170,7 @@ export default function AdminStaffPage() {
                 return (
                   <tr key={u.id} className="border-b border-white/5">
                     <td className="py-3 pr-4">{u.full_name || "—"}</td>
-                    <td className="py-3 pr-4 text-gray-300">{u.email}</td>
+                    <td className="py-3 pr-4 text-gray-300">{u.username || "—"}</td>
                     <td className="py-3 pr-4">
                       <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-semibold">
                         {roleLabels[u.role] || u.role.toUpperCase()}
@@ -216,11 +217,11 @@ export default function AdminStaffPage() {
             <h2 className="text-lg font-bold mb-4">Create Admin</h2>
             <form onSubmit={handleCreateAdmin} className="flex flex-col gap-3">
               <input
-                type="email"
-                placeholder="Email"
+                type="text"
+                placeholder="Username"
                 required
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
                 className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
               />
               <input
@@ -271,7 +272,7 @@ export default function AdminStaffPage() {
           <div className="bg-surface w-full max-w-sm rounded-lg p-6">
             <h2 className="text-lg font-bold mb-2">Admin Created</h2>
             <p className="text-sm text-gray-400 mb-4">
-              Share this temporary password with <span className="text-white">{revealedPassword.email}</span> —
+              Share this temporary password with <span className="text-white">{revealedPassword.username}</span> —
               it won&apos;t be shown again. They&apos;ll be required to change it on first login.
             </p>
             <div className="bg-background px-3 py-2 rounded font-mono text-sm mb-4 select-all">
