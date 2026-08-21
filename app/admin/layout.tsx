@@ -8,6 +8,7 @@ type Me = {
   full_name: string | null;
   email: string;
   role: string;
+  must_change_password: boolean;
 };
 
 const navItems = [
@@ -30,8 +31,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [me, setMe] = useState<Me | null>(null);
   const [checked, setChecked] = useState(false);
 
+  const isPublicPath = pathname === "/admin";
+  const isChangePasswordPath = pathname === "/admin/change-password";
+
   useEffect(() => {
-    if (pathname === "/admin") {
+    if (isPublicPath) {
       setChecked(true);
       return;
     }
@@ -51,6 +55,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           router.push("/admin");
           return;
         }
+
+        // Force a password change before reaching any other admin page.
+        if (data.must_change_password && !isChangePasswordPath) {
+          router.push("/admin/change-password");
+          return;
+        }
+
         setMe(data);
         setChecked(true);
       });
@@ -62,12 +73,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/admin");
   }
 
-  if (pathname === "/admin") {
+  if (isPublicPath) {
     return <>{children}</>;
   }
 
   if (!checked) {
     return <div className="min-h-screen bg-background" />;
+  }
+
+  // Change-password page renders full-screen, without the sidebar.
+  if (isChangePasswordPath) {
+    return <>{children}</>;
   }
 
   return (

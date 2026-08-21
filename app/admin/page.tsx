@@ -63,7 +63,9 @@ export default function AdminGatePage() {
       const me = await meRes.json();
 
       if (!adminRoles.includes(me.role)) {
-        setError("This account does not have admin access.");
+        // Same generic message as a bad password — never confirm the
+        // account exists or that credentials were correct.
+        setError("Incorrect email or password");
         setLoading(false);
         return;
       }
@@ -84,7 +86,10 @@ export default function AdminGatePage() {
     <main className="min-h-screen bg-background text-white flex items-center justify-center px-4">
       <div className="max-w-sm w-full">
         <h1 className="text-2xl font-bold mb-1">Admin Access</h1>
-        <p className="text-sm text-gray-400 mb-6">Authorized personnel only.</p>
+        <p className="text-sm text-gray-400 mb-6">
+          Authorized personnel only. If you don't have admin credentials,
+          this isn't the page you're looking for.
+        </p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
