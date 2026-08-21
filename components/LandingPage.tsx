@@ -12,8 +12,8 @@ type Film = {
 
 const faqs = [
   {
-    q: "What is AFRI HUB?",
-    a: "AFRI HUB is a streaming platform where you can watch a growing catalogue of films. Subscribe for unlimited access, or unlock individual films one at a time with a VIP Pass — no subscription required.",
+    q: "What is AFRIGOS PLAY?",
+    a: "AFRIGOS PLAY is a streaming platform where you can watch a growing catalogue of films. Subscribe for unlimited access, or unlock individual films one at a time with a VIP Pass — no subscription required.",
   },
   {
     q: "How much does it cost?",
@@ -75,7 +75,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-white">
       <header className="flex items-center justify-between px-4 sm:px-8 py-5 relative z-20">
-        <span className="text-xl sm:text-2xl font-bold tracking-tight text-accent">AFRI HUB</span>
+        <span className="text-xl sm:text-2xl font-bold tracking-tight text-accent">AFRIGOS PLAY</span>
         <div className="flex items-center gap-3">
           <Link
             href="/login"
@@ -249,7 +249,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="px-4 sm:px-8 py-8 text-center text-xs text-gray-500 border-t border-white/10">
-        © {new Date().getFullYear()} AFRI HUB. All rights reserved.
+        © {new Date().getFullYear()} AFRIGOS PLAY. All rights reserved.
       </footer>
     </main>
   );

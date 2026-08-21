@@ -582,10 +582,10 @@ export default function EditFilmPage() {
                 onChange={handleChange}
                 className="w-4 h-4 accent-accent"
               />
-              AFRI HUB Original
+              AFRIGOS PLAY Original
             </label>
             <p className="text-xs text-gray-500 mt-1">
-              Drives the "AFRI HUB Originals" rail.
+              Drives the "AFRIGOS PLAY Originals" rail.
             </p>
           </div>
         </div>

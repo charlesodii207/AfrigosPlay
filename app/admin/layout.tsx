@@ -74,7 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-background text-white flex">
       <aside className="w-56 border-r border-white/10 flex flex-col justify-between p-4">
         <div>
-          <div className="text-xl font-bold text-accent mb-6">AFRI HUB</div>
+          <div className="text-xl font-bold text-accent mb-6">AFRIGOS PLAY</div>
 
           {me && (
             <div className="bg-surface rounded p-3 mb-6">

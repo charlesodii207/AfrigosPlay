@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
   return (
     <main className="min-h-screen bg-background text-white">
       <nav className="flex items-center justify-between px-4 sm:px-8 py-5 border-b border-white/10">
-        <span className="text-xl font-bold">AFRI HUB Admin</span>
+        <span className="text-xl font-bold">AFRIGOS PLAY Admin</span>
         <div className="flex items-center gap-4 text-sm">
           <a href="/admin/films/new" className="text-accent hover:opacity-80 transition">
             + Add Film

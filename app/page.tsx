@@ -128,7 +128,7 @@ function CatalogHome() {
       <MovieRow title="Trending Now" movies={toMovies(trending)} />
       <MovieRow title="Top 10 Worldwide" movies={toMovies(top10)} showRank />
       <MovieRow title="Nollywood" movies={toMovies(nollywood)} />
-      <MovieRow title="AFRI HUB Originals" movies={toMovies(originals)} />
+      <MovieRow title="AFRIGOS PLAY Originals" movies={toMovies(originals)} />
 
       <MovieRow title="All Films" movies={movies} />
       <GenreList />
