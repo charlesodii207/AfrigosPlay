@@ -42,61 +42,74 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-white relative overflow-hidden">
+    <main className="min-h-screen bg-background text-white relative overflow-hidden flex flex-col">
       <Navbar />
 
-      {/* Subtle red glow, echoes the landing page hero */}
-      <div
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] opacity-20 blur-3xl pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(229,9,20,0.6) 0%, transparent 70%)" }}
-      />
-
-      <div className="relative z-10 px-4 sm:px-8 py-16 sm:py-24 max-w-sm mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-1 text-center">
-          Welcome Back
-        </h1>
-        <p className="text-gray-400 text-sm text-center mb-8">
-          Log in to keep watching.
-        </p>
-
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 bg-surface rounded-lg p-6 sm:p-8 shadow-2xl shadow-black"
-        >
-          <input
-            type="email"
-            placeholder="Email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="bg-background px-4 py-3.5 rounded text-sm sm:text-base outline-none focus:ring-2 focus:ring-accent"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="bg-background px-4 py-3.5 rounded text-sm sm:text-base outline-none focus:ring-2 focus:ring-accent"
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="relative max-w-sm w-full">
+          {/* Glow */}
+          <div
+            className="absolute -inset-4 rounded-2xl opacity-40 blur-2xl pointer-events-none"
+            style={{ background: "radial-gradient(circle, rgba(229,9,20,0.5) 0%, transparent 70%)" }}
           />
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <div className="relative bg-surface/80 backdrop-blur rounded-2xl border border-accent/20 shadow-[0_0_40px_rgba(229,9,20,0.15)] p-6 sm:p-8">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-center text-accent mb-1">
+              AFRIGOS PLAY
+            </h1>
+            <p className="text-gray-400 text-sm text-center mb-8">
+              Sign in to your account
+            </p>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-accent px-4 py-3.5 rounded font-bold text-sm sm:text-base disabled:opacity-50 hover:opacity-90 transition mt-2"
-          >
-            {loading ? "Logging in..." : "Log In"}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5">Email</label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-background/80 border border-white/10 px-4 py-3 rounded-lg text-sm outline-none focus:ring-2 focus:ring-accent focus:border-accent transition"
+                />
+              </div>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
-          New to Afrigos Play?{" "}
-          <Link href="/register" className="text-accent font-semibold hover:underline">
-            Sign up now
-          </Link>
-        </p>
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs text-gray-400">Password</label>
+                  <Link href="/coming-soon" className="text-xs text-accent hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full bg-background/80 border border-white/10 px-4 py-3 rounded-lg text-sm outline-none focus:ring-2 focus:ring-accent focus:border-accent transition"
+                />
+              </div>
+
+              {error && <p className="text-red-400 text-sm">{error}</p>}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-2 bg-gradient-to-r from-accent to-red-500 px-4 py-3.5 rounded-lg font-bold text-sm shadow-[0_0_20px_rgba(229,9,20,0.4)] hover:shadow-[0_0_30px_rgba(229,9,20,0.6)] hover:opacity-95 transition disabled:opacity-50"
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+            </form>
+
+            <p className="text-center text-sm text-gray-400 mt-6">
+              Don&apos;t have an account?{" "}
+              <Link href="/register" className="text-accent font-semibold hover:underline">
+                Create one
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </main>
   );
