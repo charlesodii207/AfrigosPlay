@@ -19,21 +19,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                 function send(type, args) {
                   try {
-                    var payload = {
-                      type: type,
-                      message: Array.prototype.slice.call(args).map(function (a) {
-                        try { return typeof a === "string" ? a : JSON.stringify(a); }
-                        catch (e) { return String(a); }
-                      }).join(" "),
-                      userAgent: navigator.userAgent,
-                      url: window.location.href,
-                      time: new Date().toISOString()
-                    };
-                    fetch(WEBHOOK, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(payload)
-                    }).catch(function () {});
+                    var message = Array.prototype.slice.call(args).map(function (a) {
+                      try { return typeof a === "string" ? a : JSON.stringify(a); }
+                      catch (e) { return String(a); }
+                    }).join(" ");
+                    var img = new Image();
+                    img.src = WEBHOOK + "?type=" + encodeURIComponent(type) + "&msg=" + encodeURIComponent(message.slice(0, 500));
                   } catch (e) {}
                 }
 
@@ -58,7 +49,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   send("unhandledrejection", [event.reason && event.reason.message ? event.reason.message : event.reason]);
                 };
 
-                // Also confirm the script itself ran at all.
                 send("boot", ["diagnostic script loaded successfully"]);
               })();
             `,
