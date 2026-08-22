@@ -91,7 +91,10 @@ export default function AdminStaffPage() {
       .filter((u) => roleFilter === "all" || u.role === roleFilter)
       .filter((u) => {
         if (!q) return true;
-        return (u.full_name || "").toLowerCase().includes(q);
+        return (
+          (u.full_name || "").toLowerCase().includes(q) ||
+          (u.username || "").toLowerCase().includes(q)
+        );
       })
       .sort((a, b) =>
         (a.full_name || a.username || "").localeCompare(b.full_name || b.username || "")
@@ -205,7 +208,7 @@ export default function AdminStaffPage() {
       {/* Search */}
       <input
         type="text"
-        placeholder="Search by name..."
+        placeholder="Search by name or username..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="w-full sm:w-80 bg-surface border border-white/10 px-4 py-2.5 rounded text-sm outline-none focus:ring-2 focus:ring-accent mb-4"
