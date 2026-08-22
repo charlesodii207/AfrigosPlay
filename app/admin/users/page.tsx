@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 type UserRow = {
@@ -20,11 +20,20 @@ type SessionItem = {
   created_at: string;
 };
 
+const premiumFilterTabs = [
+  { key: "all", label: "ALL" },
+  { key: "premium", label: "PREMIUM" },
+  { key: "free", label: "FREE TIER" },
+];
+
 export default function AdminUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState("");
+  const [search, setSearch] = useState("");
+  const [premiumFilter, setPremiumFilter] = useState("all");
+  const [sortBy, setSortBy] = useState<"name" | "date">("date");
 
   const [sessionsUser, setSessionsUser] = useState<UserRow | null>(null);
   const [sessions, setSessions] = useState<SessionItem[]>([]);
@@ -52,6 +61,30 @@ export default function AdminUsersPage() {
     loadUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const displayedUsers = useMemo(() => {
+    const q = search.trim().toLowerCase();
+
+    return users
+      .filter((u) => {
+        if (premiumFilter === "premium") return u.is_premium;
+        if (premiumFilter === "free") return !u.is_premium;
+        return true;
+      })
+      .filter((u) => {
+        if (!q) return true;
+        return (
+          (u.full_name || "").toLowerCase().includes(q) ||
+          u.email.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => {
+        if (sortBy === "name") {
+          return (a.full_name || a.email).localeCompare(b.full_name || b.email);
+        }
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+  }, [users, search, premiumFilter, sortBy]);
 
   async function handleToggleBlock(user: UserRow) {
     setActionError("");
@@ -151,17 +184,55 @@ export default function AdminUsersPage() {
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <h1 className="text-xl sm:text-2xl font-bold mb-1">Users</h1>
-      <p className="text-sm text-gray-400 mb-5 sm:mb-6">All registered accounts.</p>
+      <p className="text-sm text-gray-400 mb-5">All registered accounts.</p>
+
+      {/* Search + sort controls */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 sm:max-w-xs bg-surface border border-white/10 px-4 py-2.5 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+        />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as "name" | "date")}
+          className="bg-surface border border-white/10 px-3 py-2.5 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+        >
+          <option value="date">Sort: Date Joined</option>
+          <option value="name">Sort: Alphabetical</option>
+        </select>
+      </div>
+
+      {/* Premium filter tabs */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {premiumFilterTabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setPremiumFilter(tab.key)}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full transition ${
+              premiumFilter === tab.key
+                ? "bg-accent text-white"
+                : "bg-surface text-gray-400 hover:text-white"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
       {actionError && <p className="text-red-400 text-sm mb-4">{actionError}</p>}
 
       {loading ? (
         <p className="text-gray-400">Loading...</p>
+      ) : displayedUsers.length === 0 ? (
+        <p className="text-gray-400 text-sm">No users match your search.</p>
       ) : (
         <>
           {/* Mobile: stacked cards */}
           <div className="flex flex-col gap-3 md:hidden">
-            {users.map((u) => (
+            {displayedUsers.map((u) => (
               <div key={u.id} className="bg-surface rounded-lg p-4 border border-white/5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0">
@@ -207,7 +278,7 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {displayedUsers.map((u) => (
                   <tr key={u.id} className="border-b border-white/5">
                     <td className="py-3 pr-4">{u.full_name || "—"}</td>
                     <td className="py-3 pr-4 text-gray-300">{u.email}</td>
