@@ -17,7 +17,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "A subscription starts at ₦2,500 and gives you unlimited access to every film for 30 days. Prefer to pay for just one film? Get a VIP Pass for that title starting from ₦1,000 — it's yours to watch forever.",
+    a: "A subscription starts at ₦2000 and gives you unlimited access to every film for 30 days. Prefer to pay for just one film? Get a VIP Pass for that title starting from ₦1,000 — it's yours to watch forever.",
   },
   {
     q: "What's a VIP Pass?",
@@ -137,7 +137,7 @@ export default function LandingPage() {
             Your way.
           </h1>
           <p className="text-gray-200 text-base sm:text-xl mb-2 font-light">
-            Subscribe for unlimited streaming, starting at ₦2,500.
+            Subscribe for unlimited streaming, starting at ₦2000.
           </p>
           <p className="text-gray-400 text-sm sm:text-base mb-10 font-light">
             Or unlock any single film with a VIP Pass, from ₦1,000 — no subscription needed.
