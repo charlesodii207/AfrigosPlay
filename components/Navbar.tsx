@@ -31,7 +31,7 @@ export default function Navbar() {
     <nav className="relative flex items-center justify-between px-4 sm:px-8 py-5 bg-background/95 backdrop-blur-sm sticky top-0 z-50 border-b border-white/5">
       <div className="flex items-center gap-10">
         <Link href="/" className="text-2xl sm:text-3xl font-black tracking-tight text-accent">
-          AFRIGOS PLAY
+          Afrigos Play
         </Link>
 
         <div className="hidden md:flex items-center gap-7 text-sm font-semibold uppercase tracking-wide text-gray-300">

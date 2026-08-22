@@ -12,6 +12,10 @@ type UserRow = {
   is_active: boolean;
   must_change_password: boolean;
   created_at: string;
+  // Backend needs to include these on GET /api/admin/staff for the IP
+  // column to populate — null/undefined just renders as "Never logged in".
+  last_login_ip?: string | null;
+  last_login_at?: string | null;
 };
 
 type CurrentUser = {
@@ -134,16 +138,34 @@ export default function AdminStaffPage() {
     loadStaff();
   }
 
-  function StatusBadges({ u }: { u: UserRow }) {
+  // Three real states, not just is_active on/off:
+  // - hasn't completed first login yet (still on the temp password) → Pending Setup
+  // - blocked by an admin → Blocked
+  // - fully set up and not blocked → Active
+  function getStatusInfo(u: UserRow) {
+    if (u.must_change_password) {
+      return { label: "Pending Setup", className: "text-yellow-400" };
+    }
+    if (!u.is_active) {
+      return { label: "Blocked", className: "text-red-400" };
+    }
+    return { label: "Active", className: "text-green-400" };
+  }
+
+  function StatusBadge({ u }: { u: UserRow }) {
+    const { label, className } = getStatusInfo(u);
+    return <span className={`text-xs font-medium ${className}`}>{label}</span>;
+  }
+
+  function LastLoginIp({ u }: { u: UserRow }) {
+    if (!u.last_login_ip) {
+      return <span className="text-gray-500 text-xs">Never logged in</span>;
+    }
     return (
-      <div className="flex flex-col gap-1">
-        {u.is_active ? (
-          <span className="text-green-400 text-xs">Active</span>
-        ) : (
-          <span className="text-red-400 text-xs">Inactive</span>
-        )}
-        {u.must_change_password && (
-          <span className="text-yellow-400 text-[11px]">Password not reset</span>
+      <div className="text-xs">
+        <p className="text-gray-300 font-mono">{u.last_login_ip}</p>
+        {u.last_login_at && (
+          <p className="text-gray-500">{new Date(u.last_login_at).toLocaleString()}</p>
         )}
       </div>
     );
@@ -201,11 +223,16 @@ export default function AdminStaffPage() {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-3">
-                    <StatusBadges u={u} />
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-2">
+                    <StatusBadge u={u} />
                     <span className="text-gray-500 text-xs">
-                      {new Date(u.created_at).toLocaleDateString()}
+                      Joined {new Date(u.created_at).toLocaleDateString()}
                     </span>
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="text-gray-500 text-[11px] mb-0.5">Last login IP</p>
+                    <LastLoginIp u={u} />
                   </div>
 
                   <div className="pt-2 border-t border-white/5">
@@ -225,6 +252,7 @@ export default function AdminStaffPage() {
                   <th className="py-2 pr-4">Username</th>
                   <th className="py-2 pr-4">Tier</th>
                   <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Last Login IP</th>
                   <th className="py-2 pr-4">Created</th>
                   <th className="py-2 pr-4">Actions</th>
                 </tr>
@@ -243,7 +271,10 @@ export default function AdminStaffPage() {
                         </span>
                       </td>
                       <td className="py-3 pr-4">
-                        <StatusBadges u={u} />
+                        <StatusBadge u={u} />
+                      </td>
+                      <td className="py-3 pr-4">
+                        <LastLoginIp u={u} />
                       </td>
                       <td className="py-3 pr-4 text-gray-400 text-xs">
                         {new Date(u.created_at).toLocaleDateString()}

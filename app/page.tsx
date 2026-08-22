@@ -34,7 +34,6 @@ function toMovies(filmsArr: Film[]) {
 }
 
 function CatalogHome() {
-  const [apiStatus, setApiStatus] = useState<{ status: string }>({ status: "checking" });
   const [films, setFilms] = useState<Film[]>([]);
   const [featured, setFeatured] = useState<Film | null>(null);
   const [trending, setTrending] = useState<Film[]>([]);
@@ -49,7 +48,6 @@ function CatalogHome() {
       const token = localStorage.getItem("access_token");
 
       const [
-        healthRes,
         filmsRes,
         featuredRes,
         trendingRes,
@@ -58,7 +56,6 @@ function CatalogHome() {
         originalsRes,
         watchlistRes,
       ] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`).catch(() => null),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/`).catch(() => null),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/featured`).catch(() => null),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/trending`).catch(() => null),
@@ -71,8 +68,6 @@ function CatalogHome() {
             }).catch(() => null)
           : Promise.resolve(null),
       ]);
-
-      setApiStatus(healthRes && healthRes.ok ? await healthRes.json() : { status: "unreachable" });
 
       const allFilms: Film[] = filmsRes && filmsRes.ok ? await filmsRes.json() : [];
       setFilms(allFilms);
@@ -107,7 +102,6 @@ function CatalogHome() {
     return <main className="min-h-screen bg-background" />;
   }
 
-  const connected = apiStatus.status === "ok";
   const movies = toMovies(films);
 
   return (
@@ -128,20 +122,10 @@ function CatalogHome() {
       <MovieRow title="Trending Now" movies={toMovies(trending)} />
       <MovieRow title="Top 10 Worldwide" movies={toMovies(top10)} showRank />
       <MovieRow title="Nollywood" movies={toMovies(nollywood)} />
-      <MovieRow title="AFRIGOS PLAY Originals" movies={toMovies(originals)} />
+      <MovieRow title="Afrigos Play Originals" movies={toMovies(originals)} />
 
       <MovieRow title="All Films" movies={movies} />
       <GenreList />
-
-      <section className="px-4 sm:px-8 py-6 text-sm">
-        <span className={connected ? "text-green-400" : "text-red-400"}>
-          ● API status: {apiStatus.status}
-        </span>
-        <p className="text-gray-500 mt-1">
-          This confirms the frontend can reach the FastAPI backend at{" "}
-          {process.env.NEXT_PUBLIC_API_URL || "(NEXT_PUBLIC_API_URL not set)"}.
-        </p>
-      </section>
     </main>
   );
 }

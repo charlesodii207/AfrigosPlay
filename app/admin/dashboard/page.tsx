@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
     <main className="min-h-[100dvh] bg-background text-white">
       <nav className="px-4 sm:px-8 py-4 sm:py-5 border-b border-white/10">
         <div className="flex items-center justify-between">
-          <span className="text-lg sm:text-xl font-bold">AFRIGOS PLAY Admin</span>
+          <span className="text-lg sm:text-xl font-bold">Afrigos Play Admin</span>
 
           {/* Full nav links — visible from sm breakpoint up */}
           <div className="hidden sm:flex items-center gap-4 text-sm">

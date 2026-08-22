@@ -21,7 +21,7 @@ export default function LoginPage() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier: email, password }),
       });
 
       if (!res.ok) {
@@ -92,7 +92,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-sm text-gray-400 mt-6">
-          New to AFRIGOS PLAY?{" "}
+          New to Afrigos Play?{" "}
           <Link href="/register" className="text-accent font-semibold hover:underline">
             Sign up now
           </Link>
