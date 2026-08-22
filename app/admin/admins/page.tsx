@@ -4,11 +4,13 @@ import { useState, useEffect, useMemo } from "react";
 
 type UserRow = {
   id: number;
-  email: string;
+  email: string | null;
+  username: string | null;
   full_name: string | null;
   role: string;
   is_premium: boolean;
   is_active: boolean;
+  must_change_password: boolean;
   created_at: string;
 };
 
@@ -48,12 +50,12 @@ export default function AdminStaffPage() {
   const [roleFilter, setRoleFilter] = useState("all");
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newEmail, setNewEmail] = useState("");
+  const [newUsername, setNewUsername] = useState("");
   const [newFullName, setNewFullName] = useState("");
   const [newRole, setNewRole] = useState("admin");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
-  const [revealedPassword, setRevealedPassword] = useState<{ email: string; password: string } | null>(null);
+  const [revealedPassword, setRevealedPassword] = useState<{ username: string; password: string } | null>(null);
 
   const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
@@ -92,7 +94,7 @@ export default function AdminStaffPage() {
         return (u.full_name || "").toLowerCase().includes(q);
       })
       .sort((a, b) =>
-        (a.full_name || a.email).localeCompare(b.full_name || b.email)
+        (a.full_name || a.username || "").localeCompare(b.full_name || b.username || "")
       );
   }, [staff, search, roleFilter]);
 
@@ -111,7 +113,7 @@ export default function AdminStaffPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email: newEmail, full_name: newFullName || null, role: newRole }),
+        body: JSON.stringify({ username: newUsername, full_name: newFullName || null, role: newRole }),
       });
 
       const data = await res.json();
@@ -122,9 +124,9 @@ export default function AdminStaffPage() {
         return;
       }
 
-      setRevealedPassword({ email: data.email, password: data.temp_password });
+      setRevealedPassword({ username: data.username, password: data.temp_password });
       setShowCreateModal(false);
-      setNewEmail("");
+      setNewUsername("");
       setNewFullName("");
       setNewRole("admin");
       setCreating(false);
@@ -154,10 +156,41 @@ export default function AdminStaffPage() {
     loadStaff();
   }
 
+  function StatusBadges({ u }: { u: UserRow }) {
+    return (
+      <div className="flex flex-col gap-1">
+        {u.is_active ? (
+          <span className="text-green-400 text-xs">Active</span>
+        ) : (
+          <span className="text-red-400 text-xs">Inactive</span>
+        )}
+        {u.must_change_password && (
+          <span className="text-yellow-400 text-[11px]">Password not reset</span>
+        )}
+      </div>
+    );
+  }
+
+  function ActionButtons({ u, canActOnThis }: { u: UserRow; canActOnThis: boolean }) {
+    if (!canActOnThis) return <span className="text-gray-600 text-xs">—</span>;
+    return (
+      <div className="flex gap-4 sm:gap-3 text-xs">
+        <button onClick={() => handleBlock(u.id)} className="text-yellow-400 hover:underline py-1">
+          {u.is_active ? "Block" : "Unblock"}
+        </button>
+        {me?.role === "system_owner" && (
+          <button onClick={() => handleDelete(u.id)} className="text-red-400 hover:underline py-1">
+            Delete
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 sm:p-8">
-      <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-bold">Admins</h1>
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+        <h1 className="text-xl sm:text-2xl font-bold">Admins</h1>
         {canCreateAny && (
           <button
             onClick={() => setShowCreateModal(true)}
@@ -200,90 +233,108 @@ export default function AdminStaffPage() {
       ) : displayedStaff.length === 0 ? (
         <p className="text-gray-400 text-sm">No admins match your search.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b border-white/10">
-                <th className="py-2 pr-4">Name</th>
-                <th className="py-2 pr-4">Email</th>
-                <th className="py-2 pr-4">Tier</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2 pr-4">Created</th>
-                <th className="py-2 pr-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayedStaff.map((u) => {
-                const targetRank = ROLE_RANK[u.role] || 0;
-                const canActOnThis = myRank > targetRank;
-                return (
-                  <tr key={u.id} className="border-b border-white/5">
-                    <td className="py-3 pr-4">{u.full_name || "—"}</td>
-                    <td className="py-3 pr-4 text-gray-300">{u.email}</td>
-                    <td className="py-3 pr-4">
-                      <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-semibold">
-                        {roleLabels[u.role] || u.role.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4">
-                      {u.is_active ? (
-                        <span className="text-green-400 text-xs">Active</span>
-                      ) : (
-                        <span className="text-red-400 text-xs">Inactive</span>
-                      )}
-                    </td>
-                    <td className="py-3 pr-4 text-gray-400 text-xs">
+        <>
+          {/* Mobile: stacked cards */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {displayedStaff.map((u) => {
+              const targetRank = ROLE_RANK[u.role] || 0;
+              const canActOnThis = myRank > targetRank;
+              return (
+                <div key={u.id} className="bg-surface rounded-lg p-4 border border-white/5">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{u.full_name || "—"}</p>
+                      <p className="text-gray-400 text-xs truncate">{u.username || "—"}</p>
+                    </div>
+                    <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-semibold whitespace-nowrap">
+                      {roleLabels[u.role] || u.role.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-3">
+                    <StatusBadges u={u} />
+                    <span className="text-gray-500 text-xs">
                       {new Date(u.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-3 pr-4">
-                      {canActOnThis ? (
-                        <div className="flex gap-3 text-xs">
-                          <button onClick={() => handleBlock(u.id)} className="text-yellow-400 hover:underline">
-                            {u.is_active ? "Block" : "Unblock"}
-                          </button>
-                          {me?.role === "system_owner" && (
-                            <button onClick={() => handleDelete(u.id)} className="text-red-400 hover:underline">
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-600 text-xs">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </span>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5">
+                    <ActionButtons u={u} canActOnThis={canActOnThis} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop: table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-400 border-b border-white/10">
+                  <th className="py-2 pr-4">Name</th>
+                  <th className="py-2 pr-4">Username</th>
+                  <th className="py-2 pr-4">Tier</th>
+                  <th className="py-2 pr-4">Status</th>
+                  <th className="py-2 pr-4">Created</th>
+                  <th className="py-2 pr-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayedStaff.map((u) => {
+                  const targetRank = ROLE_RANK[u.role] || 0;
+                  const canActOnThis = myRank > targetRank;
+                  return (
+                    <tr key={u.id} className="border-b border-white/5">
+                      <td className="py-3 pr-4">{u.full_name || "—"}</td>
+                      <td className="py-3 pr-4 text-gray-300">{u.username || "—"}</td>
+                      <td className="py-3 pr-4">
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-semibold">
+                          {roleLabels[u.role] || u.role.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <StatusBadges u={u} />
+                      </td>
+                      <td className="py-3 pr-4 text-gray-400 text-xs">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <ActionButtons u={u} canActOnThis={canActOnThis} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* Create Admin modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4 z-50">
-          <div className="bg-surface w-full max-w-sm rounded-lg p-6">
+          <div className="bg-surface w-full max-w-sm rounded-lg p-5 sm:p-6 max-h-[90dvh] overflow-y-auto">
             <h2 className="text-lg font-bold mb-4">Create Admin</h2>
             <form onSubmit={handleCreateAdmin} className="flex flex-col gap-3">
               <input
-                type="email"
-                placeholder="Email"
+                type="text"
+                placeholder="Username"
                 required
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+                className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent w-full"
               />
               <input
                 type="text"
                 placeholder="Full name (optional)"
                 value={newFullName}
                 onChange={(e) => setNewFullName(e.target.value)}
-                className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+                className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent w-full"
               />
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value)}
-                className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent"
+                className="bg-background px-3 py-2 rounded text-sm outline-none focus:ring-2 focus:ring-accent w-full"
               >
                 {(me ? creatableRoles[me.role] || [] : []).map((r) => (
                   <option key={r} value={r}>
@@ -298,14 +349,14 @@ export default function AdminStaffPage() {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 bg-white/10 py-2 rounded text-sm"
+                  className="flex-1 bg-white/10 py-2.5 rounded text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="flex-1 bg-accent py-2 rounded text-sm font-semibold disabled:opacity-50"
+                  className="flex-1 bg-accent py-2.5 rounded text-sm font-semibold disabled:opacity-50"
                 >
                   {creating ? "Creating..." : "Create"}
                 </button>
@@ -318,18 +369,19 @@ export default function AdminStaffPage() {
       {/* One-time temp password reveal */}
       {revealedPassword && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center px-4 z-50">
-          <div className="bg-surface w-full max-w-sm rounded-lg p-6">
+          <div className="bg-surface w-full max-w-sm rounded-lg p-5 sm:p-6">
             <h2 className="text-lg font-bold mb-2">Admin Created</h2>
             <p className="text-sm text-gray-400 mb-4">
-              Share this temporary password with <span className="text-white">{revealedPassword.email}</span> —
-              it won&apos;t be shown again. They&apos;ll be required to change it on first login.
+              Share this temporary password with{" "}
+              <span className="text-white break-words">{revealedPassword.username}</span> — it won&apos;t be shown
+              again. They&apos;ll be required to change it on first login.
             </p>
-            <div className="bg-background px-3 py-2 rounded font-mono text-sm mb-4 select-all">
+            <div className="bg-background px-3 py-2 rounded font-mono text-sm mb-4 select-all break-all">
               {revealedPassword.password}
             </div>
             <button
               onClick={() => setRevealedPassword(null)}
-              className="w-full bg-accent py-2 rounded text-sm font-semibold"
+              className="w-full bg-accent py-2.5 rounded text-sm font-semibold"
             >
               Done
             </button>
