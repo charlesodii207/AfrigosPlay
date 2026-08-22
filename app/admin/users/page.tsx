@@ -20,21 +20,9 @@ type SessionItem = {
   created_at: string;
 };
 
-const ROLE_RANK: Record<string, number> = {
-  user: 0,
-  admin: 1,
-  super_admin: 2,
-  system_owner: 3,
-};
-
-function canModerate(actorRole: string, targetRole: string) {
-  return (ROLE_RANK[actorRole] ?? 0) > (ROLE_RANK[targetRole] ?? 0);
-}
-
 export default function AdminUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<UserRow[]>([]);
-  const [myRole, setMyRole] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState("");
 
@@ -50,18 +38,14 @@ export default function AdminUsersPage() {
     const token = getToken();
     if (!token) return;
 
-    Promise.all([
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((res) => (res.ok ? res.json() : null)),
-      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((res) => (res.ok ? res.json() : [])),
-    ]).then(([me, usersData]) => {
-      if (me) setMyRole(me.role);
-      setUsers(usersData);
-      setLoading(false);
-    });
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((usersData) => {
+        setUsers(usersData);
+        setLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -139,7 +123,7 @@ export default function AdminUsersPage() {
     return new Set(list.map((s) => s.ip_address)).size;
   }
 
-  function UserActions({ u, moderatable }: { u: UserRow; moderatable: boolean }) {
+  function UserActions({ u }: { u: UserRow }) {
     return (
       <div className="flex gap-4 sm:gap-3 flex-wrap">
         <button
@@ -148,22 +132,18 @@ export default function AdminUsersPage() {
         >
           View Sessions
         </button>
-        {moderatable && (
-          <>
-            <button
-              onClick={() => handleToggleBlock(u)}
-              className="text-yellow-400 hover:opacity-80 transition text-xs py-1"
-            >
-              {u.is_active ? "Block" : "Unblock"}
-            </button>
-            <button
-              onClick={() => handleDelete(u)}
-              className="text-red-400 hover:opacity-80 transition text-xs py-1"
-            >
-              Delete
-            </button>
-          </>
-        )}
+        <button
+          onClick={() => handleToggleBlock(u)}
+          className="text-yellow-400 hover:opacity-80 transition text-xs py-1"
+        >
+          {u.is_active ? "Block" : "Unblock"}
+        </button>
+        <button
+          onClick={() => handleDelete(u)}
+          className="text-red-400 hover:opacity-80 transition text-xs py-1"
+        >
+          Delete
+        </button>
       </div>
     );
   }
@@ -181,42 +161,36 @@ export default function AdminUsersPage() {
         <>
           {/* Mobile: stacked cards */}
           <div className="flex flex-col gap-3 md:hidden">
-            {users.map((u) => {
-              const moderatable = canModerate(myRole, u.role);
-              return (
-                <div key={u.id} className="bg-surface rounded-lg p-4 border border-white/5">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="min-w-0">
-                      <p className="font-semibold truncate">{u.full_name || "—"}</p>
-                      <p className="text-gray-400 text-xs truncate">{u.email}</p>
-                    </div>
-                    <span className="text-xs px-2 py-0.5 rounded bg-white/10 whitespace-nowrap">
-                      {u.role}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-xs">
-                    {u.is_premium ? (
-                      <span className="text-green-400">Premium</span>
-                    ) : (
-                      <span className="text-gray-500">Free tier</span>
-                    )}
-                    {u.is_active ? (
-                      <span className="text-green-400">Active</span>
-                    ) : (
-                      <span className="text-red-400">Blocked</span>
-                    )}
-                    <span className="text-gray-500">
-                      Joined {new Date(u.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-
-                  <div className="pt-2 border-t border-white/5">
-                    <UserActions u={u} moderatable={moderatable} />
+            {users.map((u) => (
+              <div key={u.id} className="bg-surface rounded-lg p-4 border border-white/5">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="min-w-0">
+                    <p className="font-semibold truncate">{u.full_name || "—"}</p>
+                    <p className="text-gray-400 text-xs truncate">{u.email}</p>
                   </div>
                 </div>
-              );
-            })}
+
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3 text-xs">
+                  {u.is_premium ? (
+                    <span className="text-green-400">Premium</span>
+                  ) : (
+                    <span className="text-gray-500">Free tier</span>
+                  )}
+                  {u.is_active ? (
+                    <span className="text-green-400">Active</span>
+                  ) : (
+                    <span className="text-red-400">Blocked</span>
+                  )}
+                  <span className="text-gray-500">
+                    Joined {new Date(u.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-white/5">
+                  <UserActions u={u} />
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Desktop: table */}
@@ -226,7 +200,6 @@ export default function AdminUsersPage() {
                 <tr className="text-left text-gray-400 border-b border-white/10">
                   <th className="py-2 pr-4">Name</th>
                   <th className="py-2 pr-4">Email</th>
-                  <th className="py-2 pr-4">Role</th>
                   <th className="py-2 pr-4">Premium</th>
                   <th className="py-2 pr-4">Status</th>
                   <th className="py-2 pr-4">Joined</th>
@@ -234,38 +207,32 @@ export default function AdminUsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => {
-                  const moderatable = canModerate(myRole, u.role);
-                  return (
-                    <tr key={u.id} className="border-b border-white/5">
-                      <td className="py-3 pr-4">{u.full_name || "—"}</td>
-                      <td className="py-3 pr-4 text-gray-300">{u.email}</td>
-                      <td className="py-3 pr-4">
-                        <span className="text-xs px-2 py-0.5 rounded bg-white/10">{u.role}</span>
-                      </td>
-                      <td className="py-3 pr-4">
-                        {u.is_premium ? (
-                          <span className="text-green-400 text-xs">Premium</span>
-                        ) : (
-                          <span className="text-gray-500 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 pr-4">
-                        {u.is_active ? (
-                          <span className="text-green-400 text-xs">Active</span>
-                        ) : (
-                          <span className="text-red-400 text-xs">Blocked</span>
-                        )}
-                      </td>
-                      <td className="py-3 pr-4 text-gray-400 text-xs">
-                        {new Date(u.created_at).toLocaleDateString()}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <UserActions u={u} moderatable={moderatable} />
-                      </td>
-                    </tr>
-                  );
-                })}
+                {users.map((u) => (
+                  <tr key={u.id} className="border-b border-white/5">
+                    <td className="py-3 pr-4">{u.full_name || "—"}</td>
+                    <td className="py-3 pr-4 text-gray-300">{u.email}</td>
+                    <td className="py-3 pr-4">
+                      {u.is_premium ? (
+                        <span className="text-green-400 text-xs">Premium</span>
+                      ) : (
+                        <span className="text-gray-500 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-4">
+                      {u.is_active ? (
+                        <span className="text-green-400 text-xs">Active</span>
+                      ) : (
+                        <span className="text-red-400 text-xs">Blocked</span>
+                      )}
+                    </td>
+                    <td className="py-3 pr-4 text-gray-400 text-xs">
+                      {new Date(u.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 pr-4">
+                      <UserActions u={u} />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
