@@ -78,6 +78,12 @@ export default function LandingPage() {
         <span className="text-xl sm:text-2xl font-bold tracking-tight text-accent">Afrigos Play</span>
         <div className="flex items-center gap-3">
           <Link
+            href="/subscribe"
+            className="hidden sm:inline text-sm text-gray-300 hover:text-white transition px-3 py-2"
+          >
+            Subscription
+          </Link>
+          <Link
             href="/login"
             className="text-sm text-gray-300 hover:text-white transition px-3 py-2"
           >
@@ -145,16 +151,16 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/register"
+              href="/subscribe"
               className="bg-accent px-8 py-3.5 rounded font-semibold text-sm sm:text-base"
             >
-              Get Started
+              View Subscription Plans
             </Link>
             <Link
-              href="/login"
+              href="/register"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm transition px-8 py-3.5 rounded font-semibold text-sm sm:text-base"
             >
-              I already have an account
+              Get Started
             </Link>
           </div>
         </div>

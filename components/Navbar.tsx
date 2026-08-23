@@ -13,6 +13,7 @@ export default function Navbar() {
     { label: "Home", href: "/" },
     { label: "Movies", href: "/movies" },
     { label: "Genres", href: "/genres" },
+    { label: "Subscription", href: "/subscribe" },
     { label: "Search", href: "/search" },
   ];
 
