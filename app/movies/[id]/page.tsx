@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 
+const MONTHLY_PRICE = 2000;
+
 type Film = {
   id: number;
   title: string;
@@ -35,7 +37,6 @@ export default function MovieDetailsPage() {
   const [watchlistBusy, setWatchlistBusy] = useState(false);
 
   const [access, setAccess] = useState<AccessCheck | null>(null);
-  const [actionBusy, setActionBusy] = useState(false);
   const [actionError, setActionError] = useState("");
   const [actionMessage, setActionMessage] = useState("");
 
@@ -129,28 +130,13 @@ export default function MovieDetailsPage() {
     router.push(`/watch/${id}`);
   }
 
-  async function handleSubscribe() {
+  function goToSubscribe() {
     const token = getToken();
     if (!token) {
       router.push("/login");
       return;
     }
-    setActionBusy(true);
-    setActionError("");
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/subscription/subscribe`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        setActionError("Subscription failed");
-        return;
-      }
-      setActionMessage("You're now Premium! Unlimited access for 30 days.");
-      refreshAccess();
-    } finally {
-      setActionBusy(false);
-    }
+    router.push("/subscribe");
   }
 
   function openVipModal() {
@@ -478,16 +464,14 @@ export default function MovieDetailsPage() {
             </p>
             <div className="flex flex-col gap-2 mb-4">
               <button
-                onClick={handleSubscribe}
-                disabled={actionBusy}
-                className="bg-accent hover:brightness-110 transition px-4 py-2.5 rounded-md font-semibold text-sm disabled:opacity-50"
+                onClick={goToSubscribe}
+                className="bg-accent hover:brightness-110 transition px-4 py-2.5 rounded-md font-semibold text-sm"
               >
-                Subscribe to Premium (Demo — Free) — 30 days
+                Subscribe to Premium — from ₦{Math.round(MONTHLY_PRICE * 0.8).toLocaleString()}/month
               </button>
               <button
                 onClick={openVipModal}
-                disabled={actionBusy}
-                className="bg-white/10 hover:bg-white/20 border border-white/10 transition px-4 py-2.5 rounded-md font-semibold text-sm disabled:opacity-50"
+                className="bg-white/10 hover:bg-white/20 border border-white/10 transition px-4 py-2.5 rounded-md font-semibold text-sm"
               >
                 Get VIP Pass — from ₦{film.vip_pass_min_amount.toLocaleString()}
               </button>

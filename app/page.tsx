@@ -112,7 +112,7 @@ function CatalogHome() {
         <HeroSection film={featured} />
       ) : (
         <section className="h-[40vh] flex items-center justify-center text-gray-500 text-sm">
-          No film is currently featured. An admin can set one from the Films dashboard.
+          No film is currently featured..
         </section>
       )}
 
