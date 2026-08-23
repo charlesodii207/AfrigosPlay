@@ -9,7 +9,15 @@ type Film = {
   genre: string;
   release_year: number;
   status: string;
-  is_featured: boolean;
+  featured_position: number | null;
+};
+
+const POSITION_LABELS: Record<number, string> = {
+  1: "1st",
+  2: "2nd",
+  3: "3rd",
+  4: "4th",
+  5: "5th",
 };
 
 export default function AdminFilmsPage() {
@@ -58,16 +66,14 @@ export default function AdminFilmsPage() {
     else setError("Failed to update status");
   }
 
-  async function handleSetFeatured(film: Film) {
-    const ok = await patchFilm(film.id, { is_featured: true });
+  async function handleSetFeaturedPosition(film: Film, value: string) {
+    // value is "" (not featured) or "1".."5" from the <select>.
+    // The backend auto-bumps whichever other film currently holds that
+    // slot, so we don't need to handle collisions here — just reload.
+    const position = value === "" ? null : parseInt(value, 10);
+    const ok = await patchFilm(film.id, { featured_position: position });
     if (ok) loadFilms();
-    else setError("Failed to set featured film");
-  }
-
-  async function handleUnfeature(film: Film) {
-    const ok = await patchFilm(film.id, { is_featured: false });
-    if (ok) loadFilms();
-    else setError("Failed to unfeature film");
+    else setError("Failed to update spotlight position");
   }
 
   async function handleDelete(film: Film) {
@@ -110,9 +116,35 @@ export default function AdminFilmsPage() {
     ARCHIVED: "bg-red-500/20 text-red-400",
   };
 
+  function FeaturedBadge({ position }: { position: number | null }) {
+    if (!position) return <span className="text-gray-600 text-xs">—</span>;
+    return (
+      <span className="text-xs px-2 py-0.5 rounded font-semibold bg-accent/20 text-accent whitespace-nowrap">
+        ★ Spotlight {POSITION_LABELS[position] ?? position}
+      </span>
+    );
+  }
+
+  function FeaturedSelect({ film }: { film: Film }) {
+    return (
+      <select
+        value={film.featured_position ?? ""}
+        onChange={(e) => handleSetFeaturedPosition(film, e.target.value)}
+        className="bg-surface border border-white/10 rounded text-xs py-1 px-2 text-gray-300"
+      >
+        <option value="">Not in spotlight</option>
+        {[1, 2, 3, 4, 5].map((pos) => (
+          <option key={pos} value={pos}>
+            {POSITION_LABELS[pos]} slot
+          </option>
+        ))}
+      </select>
+    );
+  }
+
   function FilmActions({ film }: { film: Film }) {
     return (
-      <div className="flex gap-4 sm:gap-3 flex-wrap">
+      <div className="flex gap-4 sm:gap-3 flex-wrap items-center">
         <Link
           href={`/admin/films/${film.id}/edit`}
           className="text-white hover:text-accent text-xs py-1"
@@ -125,21 +157,7 @@ export default function AdminFilmsPage() {
         >
           {film.status === "PUBLISHED" ? "Unpublish" : "Publish"}
         </button>
-        {film.is_featured ? (
-          <button
-            onClick={() => handleUnfeature(film)}
-            className="text-gray-400 hover:text-white text-xs py-1"
-          >
-            Unfeature
-          </button>
-        ) : (
-          <button
-            onClick={() => handleSetFeatured(film)}
-            className="text-gray-400 hover:text-white text-xs py-1"
-          >
-            Set Featured
-          </button>
-        )}
+        <FeaturedSelect film={film} />
         <button
           onClick={() => handleDelete(film)}
           className="text-red-400 hover:text-red-300 text-xs py-1"
@@ -182,11 +200,7 @@ export default function AdminFilmsPage() {
                       {film.genre} · {film.release_year}
                     </p>
                   </div>
-                  {film.is_featured && (
-                    <span className="text-xs px-2 py-0.5 rounded font-semibold bg-accent/20 text-accent whitespace-nowrap">
-                      ★ Featured
-                    </span>
-                  )}
+                  <FeaturedBadge position={film.featured_position} />
                 </div>
 
                 <div className="mb-3">
@@ -215,7 +229,7 @@ export default function AdminFilmsPage() {
                   <th className="py-2 pr-4">Genre</th>
                   <th className="py-2 pr-4">Year</th>
                   <th className="py-2 pr-4">Status</th>
-                  <th className="py-2 pr-4">Featured</th>
+                  <th className="py-2 pr-4">Spotlight</th>
                   <th className="py-2 pr-4">Actions</th>
                 </tr>
               </thead>
@@ -235,13 +249,7 @@ export default function AdminFilmsPage() {
                       </span>
                     </td>
                     <td className="py-3 pr-4">
-                      {film.is_featured ? (
-                        <span className="text-xs px-2 py-0.5 rounded font-semibold bg-accent/20 text-accent">
-                          ★ Featured
-                        </span>
-                      ) : (
-                        <span className="text-gray-600 text-xs">—</span>
-                      )}
+                      <FeaturedBadge position={film.featured_position} />
                     </td>
                     <td className="py-3 pr-4">
                       <FilmActions film={film} />

@@ -166,6 +166,7 @@ export default function EditFilmPage() {
     production_company: "",
     tags: "",
     status: "DRAFT",
+    featured_position: "", // "" = not in spotlight, else "1".."5"
     vip_pass_min_amount: "1000",
     industry: "other",
     is_afrihub_original: false,
@@ -227,6 +228,8 @@ export default function EditFilmPage() {
           production_company: film.production_company || "",
           tags: film.tags || "",
           status: film.status || "DRAFT",
+          featured_position:
+            film.featured_position != null ? String(film.featured_position) : "",
           vip_pass_min_amount: String(film.vip_pass_min_amount ?? "1000"),
           industry: film.industry || "other",
           is_afrihub_original: Boolean(film.is_afrihub_original),
@@ -345,6 +348,11 @@ export default function EditFilmPage() {
           release_year: Number(form.release_year),
           duration_minutes: Number(form.duration_minutes),
           vip_pass_min_amount: Number(form.vip_pass_min_amount),
+          // "" means "take this film out of the spotlight" -> null.
+          // If another film already holds the chosen slot, the backend
+          // bumps it out automatically — no extra handling needed here.
+          featured_position:
+            form.featured_position === "" ? null : Number(form.featured_position),
         }),
       });
 
@@ -590,15 +598,38 @@ export default function EditFilmPage() {
           </div>
         </div>
 
-        <div>
-          <label className={labelClass}>Status</label>
-          <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
-            <option value="DRAFT">Draft (hidden)</option>
-            <option value="PENDING_REVIEW">Pending Review</option>
-            <option value="PUBLISHED">Published (live now)</option>
-            <option value="UNPUBLISHED">Unpublished</option>
-            <option value="ARCHIVED">Archived</option>
-          </select>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass}>Status</label>
+            <select name="status" value={form.status} onChange={handleChange} className={inputClass}>
+              <option value="DRAFT">Draft (hidden)</option>
+              <option value="PENDING_REVIEW">Pending Review</option>
+              <option value="PUBLISHED">Published (live now)</option>
+              <option value="UNPUBLISHED">Unpublished</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+
+          <div>
+            <label className={labelClass}>Spotlight Position</label>
+            <select
+              name="featured_position"
+              value={form.featured_position}
+              onChange={handleChange}
+              className={inputClass}
+            >
+              <option value="">Not in spotlight</option>
+              <option value="1">1st slot</option>
+              <option value="2">2nd slot</option>
+              <option value="3">3rd slot</option>
+              <option value="4">4th slot</option>
+              <option value="5">5th slot</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Where this film sits in the homepage spotlight slideshow. Picking a
+              slot already in use bumps the other film out of it automatically.
+            </p>
+          </div>
         </div>
 
         <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 
 type Film = {
@@ -15,32 +15,80 @@ type Film = {
   trailer_url: string;
 };
 
-export default function HeroSection({ film }: { film: Film }) {
+// How long the cursor has to sit on the hero before the trailer starts.
+const HOVER_TO_PLAY_MS = 5000;
+// How long each slide shows before auto-advancing to the next film.
+// Set this to 5000 for a 5s slideshow, or 7000 for 7s.
+const SLIDE_INTERVAL_MS = 7000;
+
+export default function HeroSection({ films }: { films: Film[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
   const [showTrailer, setShowTrailer] = useState(false);
   const [muted, setMuted] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const slideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const film = films[activeIndex];
+
+  const clearHoverTimer = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  }, []);
+
+  const clearSlideTimer = useCallback(() => {
+    if (slideTimerRef.current) {
+      clearTimeout(slideTimerRef.current);
+      slideTimerRef.current = null;
+    }
+  }, []);
+
+  const goToNextSlide = useCallback(() => {
+    setActiveIndex((i) => (i + 1) % films.length);
+  }, [films.length]);
+
+  // Auto-advance the slideshow, but only while the user isn't hovering
+  // (so it never yanks a film away mid-trailer).
+  useEffect(() => {
+    if (films.length <= 1 || isHovering) return;
+
+    slideTimerRef.current = setTimeout(goToNextSlide, SLIDE_INTERVAL_MS);
+    return () => clearSlideTimer();
+  }, [activeIndex, isHovering, films.length, goToNextSlide, clearSlideTimer]);
+
+  // Reset trailer state whenever the active film changes.
+  useEffect(() => {
+    setShowTrailer(false);
+  }, [activeIndex]);
+
+  function handleMouseEnter() {
+    setIsHovering(true);
+    clearSlideTimer();
+    hoverTimerRef.current = setTimeout(() => setShowTrailer(true), HOVER_TO_PLAY_MS);
+  }
+
+  function handleMouseLeave() {
+    setIsHovering(false);
+    clearHoverTimer();
+    setShowTrailer(false);
+  }
+
+  useEffect(() => {
+    return () => {
+      clearHoverTimer();
+      clearSlideTimer();
+    };
+  }, [clearHoverTimer, clearSlideTimer]);
+
+  if (!film) return null;
 
   const hours = Math.floor(film.duration_minutes / 60);
   const minutes = film.duration_minutes % 60;
   const heroImage = film.backdrop_url || film.poster_url;
-
-  useEffect(() => {
-    timerRef.current = setTimeout(() => setShowTrailer(true), 8000);
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [film.id]);
-
-  function handleMouseEnter() {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setShowTrailer(true);
-  }
-
-  function handleMouseLeave() {
-    setShowTrailer(false);
-    timerRef.current = setTimeout(() => setShowTrailer(true), 8000);
-  }
 
   return (
     <section
@@ -74,7 +122,8 @@ export default function HeroSection({ film }: { film: Film }) {
       <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
 
       <div className="relative max-w-xl">
-        <p className="uppercase text-sm tracking-widest text-gray-300 mb-2">Featured</p>
+        {/* renamed from "Featured" */}
+        <p className="uppercase text-sm tracking-widest text-gray-300 mb-2">Spotlight</p>
         <h1 className="text-3xl sm:text-6xl font-bold mb-3">{film.title}</h1>
         <p className="text-sm sm:text-base text-gray-200 mb-2">
           {film.genre} • {film.release_year} • {hours}h {minutes}m
@@ -107,6 +156,24 @@ export default function HeroSection({ film }: { film: Film }) {
           )}
         </div>
       </div>
+
+      {films.length > 1 && (
+        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-8 flex gap-2 z-10">
+          {films.map((f, i) => (
+            <button
+              key={f.id}
+              onClick={() => {
+                clearSlideTimer();
+                setActiveIndex(i);
+              }}
+              aria-label={`Show ${f.title}`}
+              className={`h-1.5 rounded-full transition-all ${
+                i === activeIndex ? "w-6 bg-white" : "w-1.5 bg-white/40"
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

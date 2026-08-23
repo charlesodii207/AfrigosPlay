@@ -35,7 +35,7 @@ function toMovies(filmsArr: Film[]) {
 
 function CatalogHome() {
   const [films, setFilms] = useState<Film[]>([]);
-  const [featured, setFeatured] = useState<Film | null>(null);
+  const [featured, setFeatured] = useState<Film[]>([]);
   const [trending, setTrending] = useState<Film[]>([]);
   const [top10, setTop10] = useState<Film[]>([]);
   const [nollywood, setNollywood] = useState<Film[]>([]);
@@ -57,6 +57,7 @@ function CatalogHome() {
         watchlistRes,
       ] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/`).catch(() => null),
+        // now returns an array of up to 5 films, ordered by featured_position
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/featured`).catch(() => null),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/trending`).catch(() => null),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/films/top10`).catch(() => null),
@@ -74,9 +75,9 @@ function CatalogHome() {
 
       if (featuredRes && featuredRes.ok) {
         const data = await featuredRes.json();
-        setFeatured(data || null);
+        setFeatured(Array.isArray(data) ? data : data ? [data] : []);
       } else {
-        setFeatured(null);
+        setFeatured([]);
       }
 
       setTrending(trendingRes && trendingRes.ok ? await trendingRes.json() : []);
@@ -108,8 +109,8 @@ function CatalogHome() {
     <main className="min-h-screen bg-background text-white">
       <Navbar />
 
-      {featured ? (
-        <HeroSection film={featured} />
+      {featured.length > 0 ? (
+        <HeroSection films={featured} />
       ) : (
         <section className="h-[40vh] flex items-center justify-center text-gray-500 text-sm">
           No film is currently featured..

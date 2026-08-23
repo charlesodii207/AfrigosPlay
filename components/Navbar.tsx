@@ -8,6 +8,7 @@ export default function Navbar() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [checked, setChecked] = useState(false);
 
   const links = [
     { label: "Home", href: "/" },
@@ -20,12 +21,24 @@ export default function Navbar() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     setIsLoggedIn(!!token);
+    setChecked(true);
   }, []);
 
   function handleLogout() {
     localStorage.removeItem("access_token");
     setIsLoggedIn(false);
     router.push("/");
+  }
+
+  // Avoid a flash of the wrong nav state before we've checked localStorage.
+  if (!checked) {
+    return (
+      <nav className="relative flex items-center justify-between px-4 sm:px-8 py-5 bg-background/95 backdrop-blur-sm sticky top-0 z-50 border-b border-white/5">
+        <Link href="/" className="text-2xl sm:text-3xl font-black tracking-tight text-accent">
+          Afrigos Play
+        </Link>
+      </nav>
+    );
   }
 
   return (
@@ -35,13 +48,15 @@ export default function Navbar() {
           Afrigos Play
         </Link>
 
-        <div className="hidden md:flex items-center gap-7 text-sm font-semibold uppercase tracking-wide text-gray-300">
-          {links.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-white transition">
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        {isLoggedIn && (
+          <div className="hidden md:flex items-center gap-7 text-sm font-semibold uppercase tracking-wide text-gray-300">
+            {links.map((link) => (
+              <Link key={link.href} href={link.href} className="hover:text-white transition">
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="hidden md:flex items-center gap-4 text-sm font-semibold">
@@ -64,15 +79,17 @@ export default function Navbar() {
         )}
       </div>
 
-      <button
-        className="md:hidden text-white text-2xl"
-        onClick={() => setMenuOpen(!menuOpen)}
-        aria-label="Toggle menu"
-      >
-        {menuOpen ? "✕" : "☰"}
-      </button>
+      {isLoggedIn && (
+        <button
+          className="md:hidden text-white text-2xl"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+      )}
 
-      {menuOpen && (
+      {menuOpen && isLoggedIn && (
         <div className="absolute top-full left-0 w-full bg-surface flex flex-col md:hidden z-50 border-t border-white/10">
           {links.map((link) => (
             <Link
@@ -85,34 +102,15 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {isLoggedIn ? (
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                handleLogout();
-              }}
-              className="px-6 py-4 text-left text-gray-200 font-semibold"
-            >
-              Log Out
-            </button>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="px-6 py-4 border-b border-white/10 text-gray-200 font-semibold"
-                onClick={() => setMenuOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="px-6 py-4 text-gray-200 font-semibold"
-                onClick={() => setMenuOpen(false)}
-              >
-                Register
-              </Link>
-            </>
-          )}
+          <button
+            onClick={() => {
+              setMenuOpen(false);
+              handleLogout();
+            }}
+            className="px-6 py-4 text-left text-gray-200 font-semibold"
+          >
+            Log Out
+          </button>
         </div>
       )}
     </nav>
