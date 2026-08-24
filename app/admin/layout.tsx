@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebarInner = (
     <>
       <div>
-        <div className="text-xl font-bold text-accent mb-6">Afrigos Play</div>
+        <div className="text-xl font-bold text-accent mb-6">AFRIGOS TV</div>
 
         {me && (
           <div className="bg-surface rounded p-3 mb-6">
@@ -136,7 +136,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-[100dvh] bg-background text-white md:flex">
       {/* Mobile top bar — hidden from md up */}
       <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/10">
-        <span className="text-lg font-bold text-accent">Afrigos Play</span>
+        <span className="text-lg font-bold text-accent">AFRIGOS TV</span>
         <button
           onClick={() => setNavOpen(true)}
           aria-label="Open menu"
