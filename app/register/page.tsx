@@ -66,7 +66,7 @@ export default function RegisterPage() {
 
           <div className="relative bg-surface/80 backdrop-blur rounded-2xl border border-accent/20 shadow-[0_0_40px_rgba(229,9,20,0.15)] p-6 sm:p-8">
             <h1 className="text-2xl sm:text-3xl font-black tracking-widest text-center text-accent mb-1">
-              AFRIGOS TV
+              Afrigos Play
             </h1>
             <p className="text-gray-400 text-sm text-center mb-8">
               Create your account

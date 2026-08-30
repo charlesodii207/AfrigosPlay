@@ -572,10 +572,10 @@ export default function NewFilmPage() {
                 onChange={handleChange}
                 className="w-4 h-4 accent-accent shrink-0"
               />
-              AFRIGOS TV Original
+              Afrigos Play Original
             </label>
             <p className="text-xs text-gray-500 mt-1">
-              Drives the "AFRIGOS TV Originals" rail.
+              Drives the "Afrigos Play Originals" rail.
             </p>
           </div>
         </div>

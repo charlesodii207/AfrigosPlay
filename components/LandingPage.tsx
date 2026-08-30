@@ -12,8 +12,8 @@ type Film = {
 
 const faqs = [
   {
-    q: "What is AFRIGOS TV?",
-    a: "AFRIGOS TV is a streaming platform where you can watch a growing catalogue of films. Subscribe for unlimited access, or unlock individual films one at a time with a VIP Pass — no subscription required.",
+    q: "What is Afrigos Play?",
+    a: "Afrigos Play is a streaming platform where you can watch a growing catalogue of films. Subscribe for unlimited access, or unlock individual films one at a time with a VIP Pass — no subscription required.",
   },
   {
     q: "How much does it cost?",
@@ -75,7 +75,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-background text-white">
       <header className="flex items-center justify-between px-4 sm:px-8 py-5 relative z-20">
-        <span className="text-xl sm:text-2xl font-bold tracking-tight text-accent">AFRIGOS TV</span>
+        <span className="text-xl sm:text-2xl font-bold tracking-tight text-accent">Afrigos Play</span>
         <div className="flex items-center gap-3">
           <Link
             href="/subscribe"
@@ -255,7 +255,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="px-4 sm:px-8 py-8 text-center text-xs text-gray-500 border-t border-white/10">
-        © {new Date().getFullYear()} AFRIGOS TV. All rights reserved.
+        © {new Date().getFullYear()} Afrigos Play. All rights reserved.
       </footer>
     </main>
   );
